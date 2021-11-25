@@ -1,0 +1,309 @@
+Private Sub Workbook_Open()
+
+End Sub
+Sub TS_Search()
+
+Dim Result() As String   'Array para guardar las palabras separadas.
+
+Dim WordCount As Integer 'Variable para guardar el numero de palabras
+Dim Filas As Integer 'Cantidad de Palabras
+
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+Filas = Worksheets("Sheet2").Range("A:A").Cells.SpecialCells(xlCellTypeConstants).Count 'Obtener listado de celdas que no estan vacios
+
+
+For Y = 1 To Filas Step 1
+
+    TextStrng = Sheets("Sheet2").Cells(Y, 1).Value
+    Result = Split(TextStrng) 'Array donde se guardan las palabras
+    WordCount = UBound(Result()) + 1 'Conteo de palabras
+
+    
+
+'Ciclo Loop para separar las palabras
+    For X = 0 To WordCount - 1 Step 1
+        Result(X) = Replace(Result(X), "(", " ") 'Eliminar Simbolo (
+        Result(X) = Replace(Result(X), ")", " ") 'Eliminar Simbolo )
+        
+        If Not (Result(X) = "POR" Or Result(X) = "A" Or Result(X) = "DE" Or Result(X) = "CON" Or Result(X) = "PARA" Or Result(X) = "EN" Or Result(X) = "UNA" Or Result(X) = "O" Or Result(X) = "DEL" Or Result(X) = "EL" Or Result(X) = "LA") Then
+            Result(X) = Application.WorksheetFunction.Trim(Result(X)) 'Eliminar espacios en Blanco
+            Cells(Y, X + 2).Value = Result(X)
+        End If
+        
+        Next X
+
+'Ciclo para eliminar los espacios en Blanco
+    For X = 0 To WordCount - 1 Step 1
+        If Cells(Y, X + 2) = "" Then
+            Cells(Y, X + 2).Delete Shift:=xlToLeft
+        End If
+    Next X
+Next Y
+
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+ Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+End Sub
+
+Sub Test()
+
+'======================================Declaracion de variables===============================================
+Dim TextStrng As String ' Variable para almacenar la palabra ha separar
+Dim Result() As String   'Array para guardar las palabras separadas.
+
+Dim omisiones As Integer 'Para tener el conteo de todas las palabras que no son claves
+omisiones = 0
+Dim WordCount As Integer 'Variable para guardar el numero de palabras
+
+Dim columnasDescripciones As Integer 'Cantidad de filas con informacion de la pestaña descripciones
+columnasDescripciones = Worksheets("Descripciones").Range("B:B").Cells.SpecialCells(xlCellTypeConstants).Count 'Obtener listado de celdas que no estan vacios
+
+Dim columnasCatalogo As Integer 'Cantidad de filas con informacion de la pestaña catalago
+columnasCatalogo = Worksheets("c_ClaveProdServCP").Range("B:B").Cells.SpecialCells(xlCellTypeConstants).Count 'Obtener listado de celdas que no estan vacios
+
+
+'======================================Comandos para optimizar velocidad de busqueda=============================
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+
+ReDim keyWordsArray(columnasDescripciones, 30) As String
+ReDim matchesArray(columnasDescripcion, 1) As String
+ReDim arrayCatalogo(columnasCatalogo) As String
+
+'======================================Loop para recorrer todas las celdas con valores==================================
+For Y = 2 To columnasDescripciones Step 1 ' El numero dos es para saltar la primera fila que tiene descripciones
+omisiones = 0
+
+    TextStrng = Sheets("Descripciones").Cells(Y, 2).Value
+    Result = Split(TextStrng) 'Array donde se guardan las palabras
+    WordCount = UBound(Result()) + 1 'Conteo de palabras
+   
+
+    
+'======================================Ciclo Loop para crear un array donde se guardan todas las palabras necesarias=================================
+
+     For X = 0 To WordCount - 1 Step 1
+        Result(X) = Replace(Result(X), "(", " ") 'Eliminar Simbolo (
+        Result(X) = Replace(Result(X), ")", " ") 'Eliminar Simbolo )
+        Result(X) = Application.WorksheetFunction.Trim(Result(X)) 'Eliminar espacios en Blanco
+        If (Result(X) = "" Or Result(X) = "Y" Or Result(X) = "POR" Or Result(X) = "A" Or Result(X) = "DE" Or Result(X) = "CON" Or Result(X) = "PARA" Or Result(X) = "EN" Or Result(X) = "UNA" Or Result(X) = "O" Or Result(X) = "DEL" Or Result(X) = "EL" Or Result(X) = "LA") Then
+            omisiones = omisiones + 1
+          '  Debug.Print omisiones
+            
+        ElseIf Not (Result(X) = "" Or Result(X) = "Y" Or Result(X) = "POR" Or Result(X) = "A" Or Result(X) = "DE" Or Result(X) = "CON" Or Result(X) = "PARA" Or Result(X) = "EN" Or Result(X) = "UNA" Or Result(X) = "O" Or Result(X) = "DEL" Or Result(X) = "EL" Or Result(X) = "LA") Then
+            keyWordsArray(Y - 2, X - omisiones) = Result(X)
+            'Sheets("Descripciones").Cells(Y, X + 2 - omisiones) = keyWordsArray(Y - 1, X - omisiones)
+            'Debug.Print keyWordsArray(Y - 1, X - omisiones)
+        End If
+    Next X
+
+Next Y
+
+'===================================== Colocar menu dropdown con las palabras claves disponibles==========================================
+    
+For Y = 2 To columnasDescripciones Step 1
+Dim tempArray(30) As String
+
+For X = 0 To 30 Step 1
+tempArray(X) = keyWordsArray(Y - 2, X)
+Next X
+
+Dim s As String
+s = Application.WorksheetFunction.TextJoin(",", True, tempArray)
+'Debug.Print (s)
+        With Sheets("Descripciones").Cells(Y, 3).Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=s
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .InputTitle = ""
+        .ErrorTitle = ""
+        .InputMessage = ""
+        .ErrorMessage = ""
+        .ShowInput = True
+        .ShowError = True
+    End With
+
+Next Y
+
+'======================================Loop Para concatenar todas las descripciones posibles============================================
+For Y = 1 To columnasCatalogo Step 1
+Dim temporaryString0 As String
+Dim temporaryString1 As String
+Dim temporaryString2 As String
+Dim temporaryString3 As String
+temporaryString0 = Sheets("c_ClaveProdServCp").Cells(Y + 5, 1).Value
+temporaryString1 = Sheets("c_ClaveProdServCp").Cells(Y + 5, 2).Value
+temporaryString2 = Sheets("c_ClaveProdServCp").Cells(Y + 5, 3).Value
+If Not (temporaryString2 = "") Then
+temporaryString3 = temporaryString0 & "-" & temporaryString1 & "," & temporaryString2
+
+ElseIf (temporaryString2 = "") Then
+temporaryString3 = temporaryString0 & "-" & temporaryString1
+End If
+temporaryString3 = UCase(Replace(temporaryString3, ", ", ","))
+temporaryString3 = Replace(temporaryString3, "Á", "A")
+temporaryString3 = Replace(temporaryString3, "É", "E")
+temporaryString3 = Replace(temporaryString3, "Í", "I")
+temporaryString3 = Replace(temporaryString3, "Ó", "O")
+temporaryString3 = Replace(temporaryString3, "Ú", "U")
+
+arrayCatalogo(Y - 1) = temporaryString3
+Sheets("c_ClaveProdServCP").Cells(Y + 5, 6) = arrayCatalogo(Y - 1)
+Next Y
+
+'=====================================Loop para concatenar todas las descripciones posibles
+'arrayCatalogo es donde estan las descripciones es multidimensional, empieza con el 1
+Dim position As Integer
+Dim i As Integer
+
+For Y = 1 To columnasCatalogo Step 1
+For Z = 0 To 30 Step 1
+If Not (keyWordsArray(1, Z) = "") Then
+    position = InStr(arrayCatalogo(Y - 1), keyWordsArray(1, Z))
+    If (position <> 0) Then
+    Sheets("Descripcions").cell
+    
+    End If
+End If
+Next Z
+Next Y
+
+'==============================================Comandos para optimizar velocidad de busqueda reactivados=======================================
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+End Sub
+
+Sub consola()
+Texto = "Adrian"
+buscar = "ean"
+
+'Comparación binaria, busca P, si encuentra p lo considerará distinto
+Posicion = InStr(1, Texto, buscar, vbBinaryCompare)
+Debug.Print Posicion
+
+End Sub
+
+Sub Dropdown_List()
+On Error GoTo PROC_ERR
+Dim MyArray(2) As String
+MyArray(0) = "1"
+MyArray(1) = "2"
+MyArray(2) = "2"
+NewArray = Join(MyArray, ",")
+Debug.Print (NewArray)
+    
+    With Sheets("Sheet3").Range("A1").Validation
+        '.Delete
+        .Add Type:=xlValidateList, _
+             AlertStyle:=xlWalidAlertStop, _
+             Operator:=xlEqual, _
+             Formula1:=NewArray
+        .IgnoreBlank = False
+        .InCellDropdown = True
+        .InputTitle = ""
+        .ErrorTitle = ""
+        .InputMessage = ""
+        .ErrorMessage = ""
+        .ShowInput = True
+        .ShowError = True
+    End With
+PROC_ERR:
+MsgBox "Value: " & dblRnd & vbCrLf & _
+            "Error Line: " & Erl & vbCrLf & _
+            "Error: (" & Err.Number & ") " & Err.Description, vbCritical
+End Sub
+
+Sub CodigoInternet()
+
+Dim sheet As Worksheet
+Dim LastRow As Long
+Dim RangeArray As Variant
+Dim i As Long
+Dim d As Object
+
+Set sheet = Worksheets("Sheet3")
+
+With sheet
+    'Find Last Row
+    LastRow = .Cells(Rows.Count, "A").End(xlUp).Row
+    'Select Range & load into array
+    RangeArray = .Range("A2:A" & LastRow).Value
+    Debug.Print LBound(RangeArray)
+End With
+
+Set d = CreateObject("Scripting.Dictionary")
+
+For i = LBound(RangeArray) To UBound(RangeArray)
+    d(RangeArray(i, 1)) = 1
+Next i
+
+With Worksheets("Sheet3").Range("C1").Validation
+    .Delete
+    .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:=xlBetween, Formula1:=Join(d.Keys, ",")
+    .InCellDropdown = True
+End With
+End Sub
+
+
+Sub Prueba2()
+    Dim arr(1, 1) As String, s As String
+    Dim tempArray(1) As String
+    arr(0, 0) = "Test"
+    arr(0, 1) = "Winken"
+    arr(1, 0) = "Blinken"
+    arr(1, 1) = "Nod"
+    
+    tempArray(0) = arr(0, 0)
+    tempArray(1) = arr(0, 1)
+    s = Application.WorksheetFunction.TextJoin(",", True, tempArray)
+    Debug.Print (s)
+    With Sheets("Sheet3").Range("A1").Validation
+        .Delete
+        .Add Type:=xlValidateList, AlertStyle:=xlValidAlertStop, Operator:= _
+        xlBetween, Formula1:=s
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .InputTitle = ""
+        .ErrorTitle = ""
+        .InputMessage = ""
+        .ErrorMessage = ""
+        .ShowInput = True
+        .ShowError = True
+    End With
+End Sub
+
+Sub Test2()
+Dim string1 As String
+Dim string2 As String
+Dim string3 As String
+
+string1 = Sheets("c_ClaveProdServCp").Cells(6, 2).Value
+string2 = Sheets("c_ClaveProdServCp").Cells(6, 3).Value
+Debug.Print (string1)
+Debug.Print (string2)
+string3 = string1 & "," & string2
+Debug.Print (string3)
+End Sub
+
+
+Sub Test3()
+Dim value1 As Integer
+value1 = InStr("Tech on the Net", "Ta")
+Debug.Print (value1)
+End Sub
