@@ -1,0 +1,57 @@
+Sub InsertarFilasNuevas()
+
+'===OBTENER EL VALOR DE LA CELDA ACTUAL
+Dim currentRow As Integer
+currentRow = ActiveCell.Row
+
+If currentRow Mod 5 <> 0 And ActiveCell.Value <> "Run Plan" Then
+MsgBox ("No estas en una celda multiplo de 5 ni en la celda Run Plan")
+
+ElseIf currentRow Mod 5 = 0 And ActiveCell.Value <> "Run Plan" Then
+MsgBox ("Estas en una celda multiplo de 5 pero no es la celda Run Plan")
+
+ElseIf currentRow Mod 5 <> 0 And ActiveCell.Value = "Run Plan" Then
+MsgBox ("Estas en una celda Run Plan pero no en una multiplo de 5")
+
+Else
+
+'===FRAGMENTO PARA INSERTAR CELDAS
+Dim cellRow As Integer
+Dim floorRow As Integer
+Dim rangeToInsertCells As String
+
+cellRow = currentRow + 2
+floorRow = currentRow + 6
+rangeToInsertCells = CStr(cellRow) + ":" + CStr(floorRow)
+Rows(rangeToInsertCells).Insert
+Rows(rangeToInsertCells).ClearFormats
+
+
+'===FRAGMENTO PARA COPIAR CELDAS Y PEGARLAS
+Dim cellRowToCopy As Integer
+Dim floorRowToCopy As Integer
+Dim rangeForCopyCells As String
+cellRowToCopy = currentRow - 2
+floorRowToCopy = currentRow + 1
+rangeForCopyCells = CStr(cellRowToCopy) + ":" + CStr(floorRowToCopy)
+cellRow = currentRow + 3
+floorRow = currentRow + 6
+rangeToInsertCells = CStr(cellRow) + ":" + CStr(floorRow)
+Range(rangeForCopyCells).Copy Range(rangeToInsertCells)
+
+'====Reemplazar todos los valores de la revision anterior del run plan a 0.
+Range("E" + CStr(currentRow) + ":AV" + CStr(currentRow)).Value = 0
+
+'====Reemplazar la revision actual por la nueva
+Dim currentPartNumber As String
+Dim newPartNumber As String
+Dim separatedString() As Variant
+currentPartNumber = Range("B" + CStr(currentRow)).Value
+separetedString = Split(currentPartNumber, " ")
+newPartNumber = separetedString(0) + " Rev " + Format(CStr((CInt(separetedString(2)) + 1)), "000")
+Range("B" + CStr(currentRow + 4)).Value = newPartNumber
+
+
+End If
+
+End Sub
