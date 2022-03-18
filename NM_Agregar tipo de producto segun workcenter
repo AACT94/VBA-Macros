@@ -1,0 +1,23 @@
+Sub FillBlanksCells()
+
+Dim totalFiles As Integer
+totalFiles = 8299
+
+For x = 0 To totalFiles Step 1
+
+Select Case Cells(x + 2, 1).Value
+    Case "FAT1FL1", "FAT1FL2", "FAT1FL3", "FAT1FL3", "FAT1FL4", "FAT1FL5", "FAT1FL6", "FAT1FL7", "FAT1FL8", "FAMCMAFFR", "FAMCMAFRR", "FAMCMAPFR", "FAMCMAPRR"
+    Cells(x + 2, 8).Value = "Armrest"
+    Case "FAY2DOORLH", "FAY2DOORRH", "FAY2SC"
+    Cells(x + 2, 8).Value = "Door"
+    Case "FAY2GB", "FAY2IP1", "FAY2IP2"
+    Cells(x + 2, 8).Value = "IP"
+    Case "FAY2PC", "FAY2CON", "FAY2D1", "FAY2D2"
+    Cells(x + 2, 8).Value = "Consoles"
+    Case Else
+    
+End Select
+    
+Next x
+
+End Sub
