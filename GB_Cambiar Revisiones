@@ -1,0 +1,69 @@
+Sub Actualizar_NuevosProgramas()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+
+Dim cantidadNuevasRevisiones As Integer
+Dim filasTotalesParaActualizar As Integer
+Dim filaInicial As Integer 'Fila Inicial Donde Se Realizaran Las Actualizaciones
+cantidadNuevasRevisiones = Sheets("{newRevs}").Range("A:A").Cells.SpecialCells(xlCellTypeConstants).Count
+filasTotalesParaActualizar = (Sheets("NUEVOS PROGRAMAS").Range("AD:AD").Cells.SpecialCells(xlCellTypeConstants).Count)
+filaInicial = 5
+
+'==== INICIA LOOP PRINCIPAL
+If IsNumeric(Left(Sheets("NUEVOS PROGRAMAS").Range("AD5").Value, 8)) Then  'Checamos si la celda AD5 es un numero antes de iniciar el programa
+
+'FIRST TODO: Si el numero de parte esta para modificar pero no tiene su par en la parte de abajo entonces agregar nueva linea.
+For x = filaInicial To filasTotalesParaActualizar Step 1
+
+
+    Dim stringToSeparate() As String
+    stringToSeparate = Split(Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Value, " ")
+
+
+    For Y = 1 To cantidadNuevasRevisiones
+        Dim stringToCompare As String
+        stringToCompare = Sheets("{newRevs}").Cells(Y, 1)
+        If (stringToSeparate(0) = stringToCompare) Then
+            Sheets("NUEVOS PROGRAMAS").Cells(x, 31).Value = "TO DO"
+        End If
+    Next Y
+    
+Next x
+
+For x = filaInicial To filasTotalesParaActualizar Step 1
+   stringToSeparate = Split(Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Value, " ")
+
+    
+    For Y = 1 To cantidadNuevasRevisiones
+        stringToCompare = Sheets("{newRevs}").Cells(Y, 1)
+        If (stringToSeparate(0) = stringToCompare) Then
+            Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(Sheets("{newRevs}").Cells(Y, 2))
+            Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Interior.ColorIndex = 6
+            x = x + 1
+            Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(Sheets("{newRevs}").Cells(Y, 3))
+            Sheets("NUEVOS PROGRAMAS").Cells(x, 30).Interior.ColorIndex = 6
+        End If
+
+    Next Y
+
+Next x
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+ Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+Else
+
+MsgBox "La celda AD5 no es numero"
+
+End If
+
+End Sub
+  
