@@ -182,3 +182,76 @@ Application.Calculation = xlCalculationAutomatic
 
 End Sub
 
+Sub joss3_part_atrributes_RellenarPantalla()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+'=====Establecer cual es la hoja de referencia y cual es la hoja de trabajo
+
+Dim hojaActual As String
+Dim hojaConcentrado As String
+hojaActual = "joss3.part_attributes"
+hojaConcentrado = "Referencia"
+
+'=====Contar todas las puertas agregadas en la pestaña Referencia
+Dim cantidadTotal As Integer
+cantidadTotal = Sheets(hojaConcentrado).Range("F:F").Cells.SpecialCells(xlCellTypeConstants).Count - 1
+
+
+'=====Fila donde se va a iniciar la insercion de datos.
+Dim filaParaEmpezar As Integer
+filaParaEmpezar = 10
+
+'Registro para saber en que fila del concentrado vamos.
+Dim filaFinal As Integer
+filaFinal = 2
+
+'Cantidad de componentes que se van a agregar, deben estar acomodados horizontalmente en la hoja referencia, uno despues del otro
+Dim cantidadComponentes As Integer
+cantidadComponentes = 6 'Armrest,PullCup,Outer,Upper,Lower,MidBolster le quitamos 1 de la cantidad total
+
+
+'Loop principal para recorrer cada fila del archivo referencia
+For x = 1 To cantidadTotal Step 1
+
+    Sheets(hojaActual).Cells(filaParaEmpezar, 8).Value = Sheets(hojaConcentrado).Cells(filaFinal, 6).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 9).Value = "SIDE"
+    Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = Sheets(hojaConcentrado).Cells(filaFinal, 3).Value
+    For Y = 0 To cantidadComponentes
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 8).Value = Sheets(hojaConcentrado).Cells(filaFinal, 8 + Y).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 9).Value = "PRODUCT"
+     
+    Select Case (Y)
+        Case 0
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "ARMREST"
+        Case 1
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "PULLCUP"
+        Case 2
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "OUTER"
+        Case 3
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "LOWER"
+        Case 4
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "MID BOLSTER"
+        Case 5
+            Sheets(hojaActual).Cells(filaParaEmpezar, 10).Value = "UPPER"
+    End Select
+        
+    Next Y
+    
+    filaFinal = filaFinal + 1
+    
+Next x
+
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+ Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+End Sub
