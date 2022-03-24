@@ -1,4 +1,64 @@
-Sub Location_part_componentsRellenarPantalla()
+Sub location_requirement_spawn_rule_RellenarPantalla()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+'=====Establecer cual es la hoja de referencia y cual es la hoja de trabajo
+
+Dim hojaActual As String
+Dim hojaConcentrado As String
+hojaActual = "location_requirement_spawn_rule"
+hojaConcentrado = "Referencia"
+
+'=====Contar todas las puertas agregadas en la pestaña Referencia
+Dim cantidadTotal As Integer
+cantidadTotal = Sheets(hojaConcentrado).Range("F:F").Cells.SpecialCells(xlCellTypeConstants).Count - 1
+
+
+'=====Fila donde se va a iniciar la insercion de datos.
+Dim filaParaEmpezar As Integer
+filaParaEmpezar = 10
+
+'Registro para saber en que fila del concentrado vamos.
+Dim filaFinal As Integer
+filaFinal = 2
+
+'Cantidad de componentes que se van a agregar, deben estar acomodados horizontalmente en la hoja referencia, uno despues del otro
+Dim cantidadComponentes As Integer
+cantidadComponentes = 3 'Inserto,Skin,Pancita
+
+
+'Loop principal para recorrer cada fila del archivo referencia
+For x = 1 To cantidadTotal Step 1
+
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 6).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 6).Value
+    For Y = 0 To cantidadComponentes
+        filaParaEmpezar = filaParaEmpezar + 1
+        Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 13).Value
+        Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 14 + Y).Value
+        
+    Next Y
+    
+    filaFinal = filaFinal + 1
+    
+Next x
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+ Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+End Sub
+
+Function colorIndex(Rn As Range) As Variant
+colorIndex = Rn.Interior.colorIndex
+End Function
+Sub Location_part_components_RellenarPantalla()
 
 '====Comandos para optimizar velocidad de busqueda
 
@@ -44,6 +104,7 @@ For x = 1 To cantidadTotal Step 1
     
 Next x
 
+
 '==Comandos para optimizar velocidad de busqueda reactivados
 Application.ScreenUpdating = True
  Application.EnableEvents = True
@@ -51,3 +112,73 @@ Application.Calculation = xlCalculationAutomatic
 
 
 End Sub
+Sub Part_x_properties_RellenarPantalla()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+'=====Establecer cual es la hoja de referencia y cual es la hoja de trabajo
+
+Dim hojaActual As String
+Dim hojaConcentrado As String
+hojaActual = "Part_x_properties"
+hojaConcentrado = "Referencia"
+
+'=====Contar todas las puertas agregadas en la pestaña Referencia
+Dim cantidadTotal As Integer
+cantidadTotal = Sheets(hojaConcentrado).Range("F:F").Cells.SpecialCells(xlCellTypeConstants).Count - 1
+
+
+'=====Fila donde se va a iniciar la insercion de datos.
+Dim filaParaEmpezar As Integer
+filaParaEmpezar = 11
+
+'Registro para saber en que fila del concentrado vamos.
+Dim filaFinal As Integer
+filaFinal = 2
+
+
+'Loop principal para recorrer cada fila del archivo referencia
+For x = 1 To cantidadTotal Step 1
+
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 6).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 3).Value
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 13).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 17).Value
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 13).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 18).Value
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 13).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 18).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = "Upper"
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 14).Value
+    Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = Sheets(hojaConcentrado).Cells(filaFinal, 18).Value
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 14).Value
+     Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = "Upper"
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 15).Value
+    
+    filaParaEmpezar = filaParaEmpezar + 1
+    Sheets(hojaActual).Cells(filaParaEmpezar, 12).Value = Sheets(hojaConcentrado).Cells(filaFinal, 15).Value
+     Sheets(hojaActual).Cells(filaParaEmpezar, 13).Value = "Upper"
+    filaParaEmpezar = filaParaEmpezar + 1
+    
+    filaFinal = filaFinal + 1
+    
+Next x
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+ Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+End Sub
+
