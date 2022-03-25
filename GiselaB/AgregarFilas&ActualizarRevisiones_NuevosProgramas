@@ -47,7 +47,7 @@ If IsNumeric(Left(wSheet.Cells(x, columnToUpdate).Value, 2)) Then
 
             For Y = 1 To lastRowReference Step 1
                 
-                If (firstString(0) = rSheet.Cells(Y, 1)) Then
+                If (firstString(0) = CStr(rSheet.Cells(Y, 1))) Then
                     'wSheet.Cells(x, columnToUpdate + 1).Value = "UPDATE"
                     rangeToInsertCells = CStr(x + 1) + ":" + CStr(x + 1)
                     rangeForCopyCells = CStr(x) + ":" + CStr(x)
@@ -113,8 +113,8 @@ For x = 1 To filasTotalesParaActualizar Step 1
 
     If Not (IsEmpty(wSheet.Cells(x, columnToUpdate).Value)) Then
         stringToSeparate = Split(wSheet.Cells(x, columnToUpdate).Value, " ")
-        For Y = 1 To cantidadNuevasRevisiones
-            stringToCompare = rSheet.Cells(Y, 1)
+        For Y = 1 To cantidadNuevasRevisiones Step 1
+            stringToCompare = cStr(rSheet.Cells(Y, 1))
             If (stringToSeparate(0) = stringToCompare) Then
                 wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 2))
                 wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 6
