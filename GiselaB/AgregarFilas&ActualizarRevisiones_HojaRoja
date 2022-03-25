@@ -1,0 +1,137 @@
+Sub AgregarFilas_Roja_Y2XX_IMO3()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+'===Atajo para no tener que escribir la direccion
+Dim wSheet As Variant
+Set wSheet = Sheets("Roja Y2XX IMO3")
+Dim rSheet As Variant 'Sheet donde vienen las nuevas revisiones
+Set rSheet = Sheets("{newRevs}")
+
+
+Dim columnToUpdate As Integer
+columnToUpdate = 3
+
+'Obtener la ultima fila en excel con valor actual
+'No podemos utilizar el metodo de contar celdas, ya que si hay espacios vacios entre lineas, afecta la formula final.
+Dim lastRow As Long
+lastRow = wSheet.Cells(Rows.Count, columnToUpdate).End(xlUp).Row
+
+Dim lastRowReference As Long
+lastRowReference = rSheet.Cells(Rows.Count, 1).End(xlUp).Row
+
+'====Loop para todos las filas de la columna AD
+For x = 1 To lastRow Step 1
+Dim firstString() As String
+Dim secondString() As String
+
+If IsNumeric(Left(wSheet.Cells(x, columnToUpdate).Value, 2)) Then
+    If Not (IsEmpty(wSheet.Cells(x, columnToUpdate).Value)) And Not (IsEmpty(wSheet.Cells(x + 1, columnToUpdate).Value)) Then
+
+    firstString = Split(wSheet.Cells(x, columnToUpdate).Value, " ")
+    secondString = Split(wSheet.Cells(x + 1, columnToUpdate).Value, " ")
+
+        If (firstString(0) <> secondString(0)) Then
+
+            For Y = 1 To lastRowReference Step 1
+                
+                If (firstString(0) = rSheet.Cells(Y, 1)) Then
+                    'wSheet.Cells(x, columnToUpdate + 1).Value = "UPDATE"
+                    rangeToInsertCells = CStr(x + 1) + ":" + CStr(x + 1)
+                    rangeForCopyCells = CStr(x) + ":" + CStr(x)
+                    Rows(rangeToInsertCells).Insert
+                    Rows(rangeToInsertCells).ClearFormats
+                    Range(rangeForCopyCells).Copy Range(rangeToInsertCells)
+                    'wSheet.Cells(x, columnToUpdate).Value = CStr(rSheet.Cells(Y, 1).Value) + " Rev " + CStr(rSheet.Cells(Y, 2))
+                    'wSheet.Cells(x + 1, columnToUpdate).Value = CStr(rSheet.Cells(Y, 1).Value) + " Rev " + CStr(rSheet.Cells(Y, 3))
+                    x = x + 1
+                    lastRow = lastRow + 1
+                End If
+                    
+            Next Y
+
+        ElseIf (firstString(0) = secondString(0)) Then
+
+            'wSheet.Cells(x, columnToUpdate + 1).Value = "OK"
+            x = x + 1
+
+        End If
+    End If
+End If
+Next x
+
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+Debug.Print (lastRow)
+End Sub
+
+
+Sub ActualizarRevs_Roja_Y2XX_IMO3()
+
+'====Comandos para optimizar velocidad de busqueda
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+Dim wSheet As Variant
+Set wSheet = Sheets("Roja Y2XX IMO3") 'Hoja Donde Se Va A Actualizar
+Dim rSheet As Variant
+Set rSheet = Sheets("{newRevs}")
+Dim columnToUpdate As Integer
+columnToUpdate = 3 'Es la columna donde estan las nuevas revisiones
+
+
+Dim cantidadNuevasRevisiones As Long
+Dim filasTotalesParaActualizar As Long
+cantidadNuevasRevisiones = rSheet.Cells(Rows.Count, 1).End(xlUp).Row
+filasTotalesParaActualizar = wSheet.Cells(Rows.Count, columnToUpdate).End(xlUp).Row
+
+Debug.Print (filasTotalesParaActualizar)
+Debug.Print (cantidadNuevasRevisiones)
+
+
+'==== INICIA LOOP PRINCIPAL
+If IsNumeric(Left(wSheet.Range("C4").Value, 8)) Then  'Checamos si la celda C4 es un numero antes de iniciar el programa
+
+For x = 1 To filasTotalesParaActualizar Step 1
+
+    If Not (IsEmpty(wSheet.Cells(x, columnToUpdate).Value)) Then
+        stringToSeparate = Split(wSheet.Cells(x, columnToUpdate).Value, " ")
+        For Y = 1 To cantidadNuevasRevisiones
+            stringToCompare = rSheet.Cells(Y, 1)
+            If (stringToSeparate(0) = stringToCompare) Then
+                wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 2))
+                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 6
+                x = x + 1
+                wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 3))
+                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 6
+            End If
+    
+        Next Y
+    End If
+
+Next x
+
+'==Comandos para optimizar velocidad de busqueda reactivados
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+Else
+
+MsgBox "La celda AD5 no es numero"
+
+End If
+
+End Sub
+
