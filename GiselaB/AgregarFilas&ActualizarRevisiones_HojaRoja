@@ -1,3 +1,8 @@
+'IMPORTANTE
+'Es necesario agregar una pestaña en el archivo de excel con el siguiente nombre: {newRevs}
+'Se pegara la informacion empezando desde la columna A con el siguiente formato:
+'<Numero de Parte><Rev><NuevaRev>
+
 Sub AgregarFilas_Roja_Y2XX_IMO3()
 
 '====Comandos para optimizar velocidad de busqueda
