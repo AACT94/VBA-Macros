@@ -1,3 +1,11 @@
+'IMPORTANTE
+'Es necesario agregar una pestaña en el archivo de excel con el siguiente nombre: {newRevs}
+'Se pegara la informacion empezando desde la columna A con el siguiente formato:
+'<Numero de Parte><Rev><NuevaRev>
+
+'IMPORTANTE
+'En la hoja de trabajo se debe de agregar una fila extra que marque el final de la lista.
+
 Sub AgregarFilas_NuevosProgramas()
 
 '====Comandos para optimizar velocidad de busqueda
