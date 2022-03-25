@@ -114,7 +114,7 @@ For x = 1 To filasTotalesParaActualizar Step 1
 
     If Not (IsEmpty(wSheet.Cells(x, columnToUpdate).Value)) Then
         stringToSeparate = Split(wSheet.Cells(x, columnToUpdate).Value, " ")
-        For Y = 1 To cantidadNuevasRevisiones
+        For Y = 1 To cantidadNuevasRevisiones Step 1
             stringToCompare = rSheet.Cells(Y, 1)
             If (stringToSeparate(0) = CStr(stringToCompare)) Then
                 wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 2))
