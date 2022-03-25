@@ -1,0 +1,20 @@
+Sub Wk_Shift()
+'
+' Wk_Shift Macro
+' Macro recorded 8/6/2007 by kzbxx6
+' Macro updated  7/29/2021 by Adrian Coronado
+
+
+Dim X As Integer
+Dim filaUltimoRunPlan As Integer
+filaUltimoRunPlan = 2235 'Cambiar por la ultima fila donde se encuentra el Run Plan
+For X = 5 To filaUltimoRunPlan Step 5
+    Range("L" & X, "R" & X).Select
+    Selection.Copy
+    Range("E" & X).Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Next X
+
+    
+End Sub
