@@ -1,0 +1,23 @@
+Sub updateCell()
+
+Dim filasTotales As Integer
+Dim columnasTotales As Integer
+filasTotales = 16
+columnasTotales = 20
+
+'For X = 1 To filasTotales Step 1
+'If Not (IsEmpty(Sheets("Resume by model").Cells(7, 8 + X))) Then
+'Sheets("Resume by model").Cells(7, 8 + X) = Sheets("Resume by model").Cells(7, 8 + X) + Sheets("Resume by model").Range("B21").Value
+'End If
+'Next X
+
+For y = 0 To columnasTotales Step 2
+For X = 1 To filasTotales Step 1
+If Not (IsEmpty(Sheets("Resume by model").Cells(7 + y, 8 + X))) Then
+Sheets("Resume by model").Cells(7 + y, 8 + X) = Sheets("Resume by model").Cells(7 + y, 8 + X) + Sheets("Resume by model").Range("B21").Value
+End If
+Next X
+Next y
+
+
+End Sub
