@@ -1,0 +1,70 @@
+Sub AgregarFormula()
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+
+Dim currentRow As Integer
+Dim currentCol As Integer
+Dim lastRow As Integer
+Dim wSheet As Variant
+
+currentRow = 1
+currentCol = ActiveCell.Column
+lastRow = Cells(Rows.Count, currentCol).End(xlUp).Row
+
+For x = 1 To lastRow Step 1
+
+If Not (IsEmpty(Cells(x, currentCol))) Then
+Dim formulaForLatestRevision As String
+Dim formulaForPreviousRevision As String
+Dim columnNumber As Long
+Dim columnLetter As String
+
+'====Obtener la letra actual para poder agregarla a la formula
+columnNumber = currentCol
+columnLetter = Split(Cells(1, columnNumber).Address, "$")(1)
+
+'====Formula para obtener las nuevas revisiones
+formulaForLatestRevision = "=TEXT(MAXIFS(AdHoc!$B:$B,AdHoc!A:A," + columnLetter + CStr(x) + "),""000"")"
+
+
+columnNumber = currentCol + 2
+columnLetter = Split(Cells(1, columnNumber).Address, "$")(1)
+
+formulaForPreviousRevision = "=TEXT(" + columnLetter + CStr(x) + "-1,""000"")"
+
+Cells(x, currentCol + 2).Value = formulaForLatestRevision
+Cells(x, currentCol + 1).Value = formulaForPreviousRevision
+
+
+Cells(x, currentCol + 2).Interior.ColorIndex = 44
+Cells(x, currentCol + 1).Interior.ColorIndex = 44
+
+Cells(x, currentCol + 2).Borders(xlEdgeBottom).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 2).Borders(xlEdgeTop).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 2).Borders(xlEdgeLeft).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 2).Borders(xlEdgeRight).LineStyle = XlLineStyle.xlContinuous
+
+Cells(x, currentCol + 1).Borders(xlEdgeBottom).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 1).Borders(xlEdgeTop).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 1).Borders(xlEdgeLeft).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol + 1).Borders(xlEdgeRight).LineStyle = XlLineStyle.xlContinuous
+
+Cells(x, currentCol).Borders(xlEdgeBottom).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol).Borders(xlEdgeTop).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol).Borders(xlEdgeLeft).LineStyle = XlLineStyle.xlContinuous
+Cells(x, currentCol).Borders(xlEdgeRight).LineStyle = XlLineStyle.xlContinuous
+
+End If
+
+Debug.Print (Cells(x, currentCol).Value = "?")
+Next x
+
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
+End Sub
