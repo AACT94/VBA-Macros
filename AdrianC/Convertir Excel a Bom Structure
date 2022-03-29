@@ -1,0 +1,44 @@
+Sub ConvertirABomStructure()
+Dim lastColumn As String
+Dim lastColumnAsNumber As Integer
+Dim columnLetterStartSelection As String
+Dim columnLetterEndSelection As String
+Dim copiedDestinationStart As String
+Dim addedValue As Integer
+addedValue = 5
+
+
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
+
+'===Devolver la ultima columna que tiene informacion
+'==Primero obtenemos la direccion pero nos la devuelve con el simbolo $ que vamos a quitar utilizando la funcion Replace
+'Despues utilizaremos una funcion definida para eliminar el numero
+
+lastColumn = Remove_Number(Replace(CStr(Range("A1").SpecialCells(xlCellTypeLastCell).Address), "$", ""))
+lastColumnAsNumber = Range(lastColumn + "1").Column
+
+For x = 3 To lastColumnAsNumber Step 3
+columnLetterStartSelection = Split(Cells(1, x).Address, "$")(1)
+columnLetterEndSelection = Split(Cells(1, x + 5).Address, "$")(1)
+copiedDestinationStart = Split(Cells(1, lastColumnAsNumber + addedValue).Address, "$")(1)
+addedValue = addedValue + 7
+
+ActiveSheet.Columns(columnLetterStartSelection + ":" + columnLetterEndSelection).Copy ActiveSheet.Columns(copiedDestinationStart)
+
+Next x
+
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+End Sub
+
+Function Remove_Number(Text As String) As String
+With CreateObject("VBScript.RegExp")
+.Global = True
+.Pattern = "[0-9]"
+Remove_Number = .Replace(Text, "")
+End With
+End Function
