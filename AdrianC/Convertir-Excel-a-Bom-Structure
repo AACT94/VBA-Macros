@@ -5,8 +5,9 @@ Dim columnLetterStartSelection As String
 Dim columnLetterEndSelection As String
 Dim copiedDestinationStart As String
 Dim addedValue As Integer
+Dim columnToStart As Integer
 addedValue = 5
-
+columnToStart = 1
 
 Application.ScreenUpdating = False
 Application.EnableEvents = False
@@ -19,7 +20,7 @@ Application.Calculation = xlCalculationManual
 lastColumn = Remove_Number(Replace(CStr(Range("A1").SpecialCells(xlCellTypeLastCell).Address), "$", ""))
 lastColumnAsNumber = Range(lastColumn + "1").Column
 
-For x = 3 To lastColumnAsNumber Step 3
+For x = columnToStart To lastColumnAsNumber Step 3
 columnLetterStartSelection = Split(Cells(1, x).Address, "$")(1)
 columnLetterEndSelection = Split(Cells(1, x + 5).Address, "$")(1)
 copiedDestinationStart = Split(Cells(1, lastColumnAsNumber + addedValue).Address, "$")(1)
@@ -34,11 +35,3 @@ Application.EnableEvents = True
 Application.Calculation = xlCalculationAutomatic
 
 End Sub
-
-Function Remove_Number(Text As String) As String
-With CreateObject("VBScript.RegExp")
-.Global = True
-.Pattern = "[0-9]"
-Remove_Number = .Replace(Text, "")
-End With
-End Function
