@@ -138,5 +138,3 @@ MsgBox "La celda B4 no es numero"
 End If
 
 End Sub
-
-
