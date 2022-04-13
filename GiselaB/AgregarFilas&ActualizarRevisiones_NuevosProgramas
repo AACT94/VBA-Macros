@@ -117,10 +117,10 @@ For x = 1 To filasTotalesParaActualizar Step 1
             stringToCompare = cStr(rSheet.Cells(Y, 1))
             If (stringToSeparate(0) = stringToCompare) Then
                 wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 2))
-                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 6
+                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 35
                 x = x + 1
                 wSheet.Cells(x, columnToUpdate).Value = CStr(stringToSeparate(0)) + " Rev " + CStr(rSheet.Cells(Y, 3))
-                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 6
+                wSheet.Cells(x, columnToUpdate).Interior.ColorIndex = 35
             End If
     
         Next Y
