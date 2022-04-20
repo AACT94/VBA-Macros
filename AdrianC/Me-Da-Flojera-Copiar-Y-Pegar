@@ -1,0 +1,11 @@
+Sub meDaFlojeraCopiarYPegar()
+Dim currentRow As Variant
+Dim currentColumn As Variant
+currentRow = ActiveCell.Row
+currentColumn = ActiveCell.Column
+Cells(currentRow - 1, currentColumn).Copy Cells(currentRow, currentColumn)
+Cells(currentRow - 1, currentColumn + 1).Copy Cells(currentRow, currentColumn + 1)
+Cells(currentRow - 1, currentColumn + 2).Copy Cells(currentRow, currentColumn + 2)
+
+
+End Sub
