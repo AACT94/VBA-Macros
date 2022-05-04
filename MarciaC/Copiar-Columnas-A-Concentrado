@@ -1,0 +1,31 @@
+Sub CopiarColumns()
+On Error GoTo ErrHandler
+
+Dim answer As Integer
+answer = MsgBox("¿Ambos archivos fueron renombrados a MCM1 y MCM2?", vbYesNo)
+
+
+If answer = vbYes Then
+
+    Workbooks.Open Filename:=".\MCM1.csv"
+    Workbooks.Open Filename:=".\MCM2.csv"
+    Cells.ClearContents
+    
+    Workbooks("MCM1.csv").Worksheets("MCM1").Range("A:R").Copy _
+    ThisWorkbook.Worksheets("Sheet1").Range("A:R")
+    
+    Workbooks("MCM2.csv").Worksheets("MCM2").Range("C:R").Copy _
+    ThisWorkbook.Worksheets("Sheet1").Range("S:AH")
+    
+    Workbooks("MCM1.csv").Close SaveChanges:=False
+    Workbooks("MCM2.csv").Close SaveChanges:=False
+    Exit Sub
+
+End If
+
+ErrHandler:
+MsgBox ("Es Necesario Abrir Ambos Archivos MCM1 y MCM2 para proceder")
+
+
+
+End Sub
