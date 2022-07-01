@@ -1,0 +1,37 @@
+'Funciones especiales para traer la descripcion y el producto de un programa sin necesidad de un vlookup
+'Para ello es necesario crear la pestaña Concentrado Descripciones con tres columnas
+'Columna 1: Numero de parte, Columna 2: Descripcion, Columna 3: Producto
+
+Function Estrella(Rn As Range) As Variant
+
+Dim Part_Number As String
+Dim Split_Part_Number() As String
+Dim Part_Number_NO_Rev As String
+Dim Descripcion As String
+
+Part_Number = CStr(Rn.Value)
+Separated_Part_Number = Split(Part_Number, " ")
+Part_Number_NO_Rev = Separated_Part_Number(0)
+Descripcion = Application.WorksheetFunction.VLookup(Part_Number_NO_Rev, ThisWorkbook.Worksheets("Concentrado Descripciones").Range("A:B"), 2, False)
+Estrella = Descripcion
+    
+
+End Function
+
+
+Function Rivera(Rn As Range) As Variant
+
+Dim Part_Number As String
+Dim Split_Part_Number() As String
+Dim Part_Number_NO_Rev As String
+Dim Programa As String
+
+Part_Number = CStr(Rn.Value)
+Separated_Part_Number = Split(Part_Number, " ")
+Part_Number_NO_Rev = Separated_Part_Number(0)
+Programa = Application.WorksheetFunction.VLookup(Part_Number_NO_Rev, ThisWorkbook.Worksheets("Concentrado Descripciones").Range("A:C"), 3, False)
+Rivera = Programa
+    
+
+End Function
+
