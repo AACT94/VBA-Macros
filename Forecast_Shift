@@ -9,6 +9,11 @@ Dim X As Integer
 Dim filaUltimoRunPlan As Integer
 filaUltimoRunPlan = 2235 'Cambiar este valor por la ultima que sea Run Plan
 
+Application.ScreenUpdating = False  'Desabilita a Excel de actualizar la pantalla 
+Application.EnableEvents = False  'Desabilita a Excel para escuchar eventos
+Application.Calculation = xlCalculationManual 'Desahibilita el hacer calculos
+
+
 For X = 5 To filaUltimoRunPlan Step 5
     Range("T" & X, "AF" & X).Select
     Selection.Copy
@@ -17,5 +22,8 @@ For X = 5 To filaUltimoRunPlan Step 5
         :=False, Transpose:=False
     Next X
 
+Application.ScreenUpdating = True 
+Application.EnableEvents = True 
+Application.Calculation = xlCalculationAutomatic
     
 End Sub
