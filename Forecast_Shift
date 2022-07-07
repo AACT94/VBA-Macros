@@ -1,0 +1,21 @@
+Sub forecast_Shift()
+'
+' forecast_Shift Macro
+' Macro recorded 4/24/2006 by Loyda Villa
+' Macro updated  7/29/2021 by Adrian Coronado
+
+
+Dim X As Integer
+Dim filaUltimoRunPlan As Integer
+filaUltimoRunPlan = 2235 'Cambiar este valor por la ultima que sea Run Plan
+
+For X = 5 To filaUltimoRunPlan Step 5
+    Range("T" & X, "AF" & X).Select
+    Selection.Copy
+    Range("S" & X).Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Next X
+
+    
+End Sub
