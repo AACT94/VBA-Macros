@@ -4,6 +4,10 @@ Dim numeroDeFilasABorrar As Integer
 Dim numeroDeSaltos As Integer
 Dim CurrentWorksheet As String
 
+'Secuencia para que mis programas vallan mas rapido
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
 
 Pointer = 5
 CurrentWorksheet = "NO PO's Graph's"
@@ -15,13 +19,14 @@ For I = 0 To 16 Step 1
 For J = 0 To numeroDeFilasABorrar Step 1
 Sheets(CurrentWorksheet).Rows(Pointer).Select
 Sheets(CurrentWorksheet).Rows(Pointer).Delete
- 
+
 Next J
 Pointer = Pointer + numeroDeSaltos
 Next I
 
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+
+
 End Sub
-
-
-
-
