@@ -1,0 +1,27 @@
+Sub EliminarFilas()
+Dim Pointer As Integer
+Dim numeroDeFilasABorrar As Integer
+Dim numeroDeSaltos As Integer
+Dim CurrentWorksheet As String
+
+
+Pointer = 5
+CurrentWorksheet = "NO PO's Graph's"
+numeroDeFilasABorrar = 2 'Siempre es uno menos a la queremos usar.
+numeroDeSaltos = 4
+
+For I = 0 To 16 Step 1
+
+For J = 0 To numeroDeFilasABorrar Step 1
+Sheets(CurrentWorksheet).Rows(Pointer).Select
+Sheets(CurrentWorksheet).Rows(Pointer).Delete
+ 
+Next J
+Pointer = Pointer + numeroDeSaltos
+Next I
+
+End Sub
+
+
+
+
