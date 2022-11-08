@@ -1,61 +1,74 @@
 Sub Enviar_Correo_Solicitar_Material()
 
-    Result = MsgBox("¿Enviar correo para solicitar material?", vbYesNo + vbQuestion)
+Application.ScreenUpdating = False
+Application.EnableEvents = False
+Application.Calculation = xlCalculationManual
 
-    If Result = vbYes Then
+Result = MsgBox("¿Enviar correo para solicitar material?", vbYesNo + vbQuestion)
 
-    '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
-        
-        Dim EmailApp As Outlook.Application 'To refer to outlook
-        Set EmailApp = New Outlook.Application  'Here we created an instance of the outlook app
-        
-        ''Now we need to create the email object
-        Dim EmailItem As Outlook.MailItem '
-        Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
-        
-        
-        
-        '====== CODIGO PARA AGREGAR MAS USUARIOS ========
-        
-        Dim CantidadCeldas_To As Integer
-        Dim WorksheetNameForContactos As String
-                
-        WorksheetNameForContactos = "CONTACTOS"
-        CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
-        
-        
-        For x = 1 To (CantidadCeldas_To - 1) Step 1
-        
-            EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
-        
-        Next x
-        
-        EmailItem.CC = "acoronado03@intevaproducts.com"
-        EmailItem.BCC = "acoronado03@intevaproducts.com"
-        
-        Dim s_Programs As String
-        Dim temporary_Collection As Collection
-        Set temporary_Collection = New Collection
-        Set temporary_Collection = ObtenerListadoDeProgramas()
-        s_Programs = temporary_Collection.item(1)
-        s_Table = temporary_Collection.item(2)
-        
-        
-        If s_Programs <> "" Then
+If Result = vbYes Then
+
+'====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
+    
+    Dim EmailApp As Outlook.Application 'To refer to outlook
+    Set EmailApp = New Outlook.Application  'Here we created an instance of the outlook app
+    
+    ''Now we need to create the email object
+    Dim EmailItem As Outlook.MailItem '
+    Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
+    
+    
+    
+    '====== CODIGO PARA AGREGAR MAS USUARIOS ========
+    
+    Dim CantidadCeldas_To As Integer
+    Dim WorksheetNameForContactos As String
             
-            EmailItem.Subject = "Requisicion de Material"
-            EmailItem.HTMLBody = "Requisicion para las siguientes lineas de producto: " + s_Programs + "<br/><br/><table>" + s_Table + "</table>"
-            EmailItem.Send
-            
-        ElseIf s_Programs = "" Then
-            
-            MsgBox ("Primero llena la informacion antes de enviar la solicitud")
-            
-        End If
-    Else: MsgBox "OK, correo no enviado"
+    WorksheetNameForContactos = "CONTACTOS"
+    CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
+    
+    
+    For x = 1 To (CantidadCeldas_To - 1) Step 1
+    
+        EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
+    
+    Next x
+    
+    EmailItem.CC = "acoronado03@intevaproducts.com"
+    EmailItem.BCC = "acoronado03@intevaproducts.com"
+    
+    Dim s_Programs As String
+    Dim temporary_Collection As Collection
+    Set temporary_Collection = New Collection
+    Set temporary_Collection = ObtenerListadoDeProgramas()
+    s_Programs = temporary_Collection.item(1)
+    s_Table = temporary_Collection.item(2)
+    
+    
+    If s_Programs <> "" Then
+        
+        EmailItem.Subject = "Requisicion de Material"
+        EmailItem.HTMLBody = "Requisicion para las siguientes lineas de producto: " + s_Programs + "<br/><br/><table>" + s_Table + "</table>"
+        EmailItem.Send
+        
+    ElseIf s_Programs = "" Then
+        
+        MsgBox ("Primero llena la informacion antes de enviar la solicitud")
+        
+    End If
+    Else:
+        MsgBox "OK, correo no enviado"
+        Application.ScreenUpdating = True
+        Application.EnableEvents = True
+        Application.Calculation = xlCalculationAutomatic
+        Exit Sub
     End If
 
 MsgBox "Correo enviado correctamente"
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
+        
 End Sub
 
 Function ObtenerListadoDeProgramas() As Collection
@@ -162,6 +175,10 @@ Function ArrayRemoveDups(MyArray As Variant) As Variant
 End Function
 
 Sub Enviar_Correo_Material_Enviado()
+    
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
 
     Result = MsgBox("¿Estas listo para empezar a cargar informacion de envio?", vbYesNo + vbQuestion)
     If Result = vbYes Then
@@ -197,9 +214,21 @@ Sub Enviar_Correo_Material_Enviado()
         EmailItem.Subject = "Test"
         EmailItem.HTMLBody = "Confirmacion de materiales enviados: " + "<br/><br/><table>" + Confirmar_Pedido() + "</table>"
         EmailItem.Send
+        
+        Application.ScreenUpdating = True
+        Application.EnableEvents = True
+        Application.Calculation = xlCalculationAutomatic
+        
     Else: MsgBox "Entendido, puedes volver a iniciar el proceso presionando el boton de nuevo"
+        Application.ScreenUpdating = True
+        Application.EnableEvents = True
+        Application.Calculation = xlCalculationAutomatic
+        Exit Sub
     End If
 MsgBox "Correo enviado correctamente"
+Application.ScreenUpdating = True
+Application.EnableEvents = True
+Application.Calculation = xlCalculationAutomatic
 End Sub
 
 
