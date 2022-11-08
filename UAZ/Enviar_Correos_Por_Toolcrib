@@ -1,0 +1,380 @@
+Sub Enviar_Correo_Solicitar_Material()
+
+    Result = MsgBox("¿Enviar correo para solicitar material?", vbYesNo + vbQuestion)
+
+    If Result = vbYes Then
+
+    '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
+        
+        Dim EmailApp As Outlook.Application 'To refer to outlook
+        Set EmailApp = New Outlook.Application  'Here we created an instance of the outlook app
+        
+        ''Now we need to create the email object
+        Dim EmailItem As Outlook.MailItem '
+        Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
+        
+        
+        
+        '====== CODIGO PARA AGREGAR MAS USUARIOS ========
+        
+        Dim CantidadCeldas_To As Integer
+        Dim WorksheetNameForContactos As String
+                
+        WorksheetNameForContactos = "CONTACTOS"
+        CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
+        
+        
+        For x = 1 To (CantidadCeldas_To - 1) Step 1
+        
+            EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
+        
+        Next x
+        
+        EmailItem.CC = "acoronado03@intevaproducts.com"
+        EmailItem.BCC = "acoronado03@intevaproducts.com"
+        
+        Dim s_Programs As String
+        Dim temporary_Collection As Collection
+        Set temporary_Collection = New Collection
+        Set temporary_Collection = ObtenerListadoDeProgramas()
+        s_Programs = temporary_Collection.item(1)
+        s_Table = temporary_Collection.item(2)
+        
+        
+        If s_Programs <> "" Then
+            
+            EmailItem.Subject = "Requisicion de Material"
+            EmailItem.HTMLBody = "Requisicion para las siguientes lineas de producto: " + s_Programs + "<br/><br/><table>" + s_Table + "</table>"
+            EmailItem.Send
+            
+        ElseIf s_Programs = "" Then
+            
+            MsgBox ("Primero llena la informacion antes de enviar la solicitud")
+            
+        End If
+    Else: MsgBox "OK, correo no enviado"
+    End If
+
+MsgBox "Correo enviado correctamente"
+End Sub
+
+Function ObtenerListadoDeProgramas() As Collection
+Dim var As Collection
+Set var = New Collection
+Dim i_Cantidad_Filas_Toolcrib As Integer
+Dim st_Worksheet_Name_Toolcrib As String
+Dim st_Product_Lines_Names As String
+Dim ar_st_Product_Lines() As String
+Dim clean_ar_st_Product_Lines() As String
+Dim st_Return_Programs As String
+Dim i_Column_Dia_Actual As Integer
+Dim variable As Double
+Dim st_HTML_Table_CSV As String
+
+st_Worksheet_Name_Toolcrib = "Control tool crib F1"
+st_Product_Lines_Names = ""
+st_Return_Programs = ""
+i_Cantidad_De_Registros = 0
+st_HTML_Table_CSV = ""
+
+variable = Worksheets(st_Worksheet_Name_Toolcrib).Cells(1, 17).Value
+
+i_Column_Dia_Actual = WorksheetFunction.Match(variable, Rows(2))
+
+'====Calcular cantidad de filas totales que tendremos que revisar
+i_Cantidad_Filas_Toolcrib = WorksheetFunction.CountA(Worksheets(st_Worksheet_Name_Toolcrib).Range("B:B")) - 1
+
+For x = 3 To (i_Cantidad_Filas_Toolcrib + 2) Step 1
+
+    If Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" Then
+        Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.Color = vbYellow
+        st_Product_Lines_Names = st_Product_Lines_Names + Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, 2).Value + ","
+        st_HTML_Table_CSV = st_HTML_Table_CSV + Escribir_LogBook(x, i_Column_Dia_Actual, st_Worksheet_Name_Toolcrib)
+        i_Cantidad_De_Registros = i_Cantidad_De_Registros + 1
+    End If
+
+Next x
+
+
+If st_Product_Lines_Names <> "" Then
+    ar_st_Product_Lines = Split(st_Product_Lines_Names, ",")
+    clean_ar_st_Product_Lines = ArrayRemoveDups(ar_st_Product_Lines)
+    
+    For x = 0 To UBound(clean_ar_st_Product_Lines) Step 1:
+    
+        If x <> UBound(clean_ar_st_Product_Lines) Then
+            st_Return_Programs = st_Return_Programs + clean_ar_st_Product_Lines(x) + ", "
+        
+        ElseIf x = 0 Then
+            st_Return_Programs = clean_ar_st_Product_Lines(x)
+        
+        Else
+        st_Return_Programs = st_Return_Programs + "y " + clean_ar_st_Product_Lines(x)
+        
+        End If
+        
+        
+    Next x
+    
+    var.Add st_Return_Programs
+    var.Add CSV_Table_To_HTML(st_HTML_Table_CSV, 5)
+    Set ObtenerListadoDeProgramas = var
+
+End If
+var.Add ""
+var.Add ""
+Set ObtenerListadoDeProgramas = var
+
+End Function
+
+Function ArrayRemoveDups(MyArray As Variant) As Variant
+    Dim nFirst As Long, nLast As Long, i As Long
+    Dim item As String
+    
+    Dim arrTemp() As String
+    Dim Coll As New Collection
+
+    'Get First and Last Array Positions
+    nFirst = LBound(MyArray)
+    nLast = UBound(MyArray)
+    
+    'Populate Temporary Collection
+    On Error Resume Next
+    For i = nFirst To nLast - 1
+        Coll.Add MyArray(i), MyArray(i)
+        Debug.Print (MyArray(i))
+    Next i
+    Err.Clear
+    On Error GoTo 0
+
+    'Resize Array
+    nLast = Coll.Count + nFirst - 1
+    ReDim arrTemp(nFirst To nLast)
+    
+    'Populate Array
+    For i = nFirst To nLast
+        arrTemp(i) = Coll(i - nFirst + 1)
+    Next i
+    
+    'Output Array
+    ArrayRemoveDups = arrTemp
+
+End Function
+
+Sub Enviar_Correo_Material_Enviado()
+
+    Result = MsgBox("¿Estas listo para empezar a cargar informacion de envio?", vbYesNo + vbQuestion)
+    If Result = vbYes Then
+        '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
+    
+        Dim EmailApp As Outlook.Application 'To refer to outlook
+        Set EmailApp = New Outlook.Application 'Here we created an instance of the outlook app
+        
+        ''Now we need to create the email object
+        Dim EmailItem As Outlook.MailItem '
+        Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
+        
+        
+        
+        '====== CODIGO PARA AGREGAR MAS USUARIOS ========
+        
+        Dim CantidadCeldas_To As Integer
+        Dim WorksheetNameForContactos As String
+                
+        WorksheetNameForContactos = "CONTACTOS"
+        CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
+        
+        
+        For x = 1 To (CantidadCeldas_To - 1) Step 1
+        
+        EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
+        
+        Next x
+        
+        EmailItem.CC = "acoronado03@intevaproducts.com"
+        EmailItem.BCC = "acoronado03@intevaproducts.com"
+        
+        EmailItem.Subject = "Test"
+        EmailItem.HTMLBody = "Confirmacion de materiales enviados: " + "<br/><br/><table>" + Confirmar_Pedido() + "</table>"
+        EmailItem.Send
+    Else: MsgBox "Entendido, puedes volver a iniciar el proceso presionando el boton de nuevo"
+    End If
+MsgBox "Correo enviado correctamente"
+End Sub
+
+
+Function Escribir_LogBook(Fila_Actual As Variant, Column_Dia_Actual As Integer, s_Toolcrib_Page_Name As String) As String
+
+Dim s_Logbook_Name As String
+Dim i_latest_file As Integer
+
+Dim i_Date_Column As Integer
+Dim i_ProductLine_Column As Integer
+Dim i_PartNumber_Column As Integer
+Dim i_Description_Column As Integer
+Dim i_Pedido_Column As Integer
+Dim i_RowValue_Column As Integer
+
+
+i_Date_Column = 1
+i_ProductLine_Column = 2
+i_PartNumber_Column = 3
+i_Description_Column = 4
+i_Pedido_Column = 5
+i_RowValue_Column = 16383
+i_ColumnValue_Column = 16384
+
+
+s_Logbook_Name = "LOGBOOK_PEDIDOS"
+i_latest_file = WorksheetFunction.CountA(Worksheets(s_Logbook_Name).Range("A:A"))
+
+Worksheets(s_Logbook_Name).Unprotect ("admin")
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).Value = Now()
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).NumberFormat = "YYYY/MM/DD hh:mm"
+
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ProductLine_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 2)
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_PartNumber_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 3)
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Description_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 4)
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Pedido_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, Column_Dia_Actual)
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_RowValue_Column).Value = Fila_Actual
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ColumnValue_Column).Value = Column_Dia_Actual
+
+Escribir_LogBook = CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).Value)
+Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ProductLine_Column).Value)
+Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_PartNumber_Column).Value)
+Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Description_Column).Value)
+Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Pedido_Column).Value) + "<<"
+Worksheets(s_Logbook_Name).Protect ("admin")
+End Function
+
+Function CSV_Table_To_HTML(CSV_Info As String, Qty_Values_Per_Row As Integer) As String
+
+    Dim Array_String() As String
+    Dim Array_Length As Integer
+    Dim Redacted_Table As String
+    Dim Array_Pointer As Integer
+        
+    Array_Pointer = 0
+    
+    Array_String() = Split(CSV_Info, "<<")
+    Array_Points = UBound(Array_String) / Qty_Values_Per_Row
+    Redacted_Table = "<style> table,tr,th,td { border: 1px solid black; border-collapse: collapse; text-align: left}</style>"
+    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th></tr>"
+    
+    
+    For x = 1 To Array_Points Step 1
+    
+        Redacted_Table = Redacted_Table + "<tr>"
+            
+            For Y = Array_Pointer To Array_Pointer + Qty_Values_Per_Row - 1 Step 1
+            
+                Redacted_Table = Redacted_Table + "<td>&nbsp;&nbsp;" + Array_String(Y) + "&nbsp;&nbsp;</td>"
+                
+            Next Y
+            
+        Array_Pointer = Array_Pointer + Qty_Values_Per_Row
+        Redacted_Table = Redacted_Table + "</tr>"
+        
+    Next x
+        CSV_Table_To_HTML = Redacted_Table
+
+End Function
+
+Function Confirmar_Pedido() As String
+
+
+Dim workbook_name As String
+Dim workbook_name_to_update As String
+Dim data_csv_string As String
+
+workbook_name = "LOGBOOK_PEDIDOS"
+workbook_name_to_update = "Control tool crib F1"
+data_csv_string = ""
+Worksheets(workbook_name).Unprotect ("admin")
+
+
+
+
+Dim last_row As Integer
+last_row = WorksheetFunction.CountA(Worksheets(workbook_name).Range("A:A"))
+
+Dim columna_recibido As Integer
+columna_recibido = 6
+
+Dim message_string As String
+
+For x = 2 To last_row Step 1
+
+    If Worksheets(workbook_name).Cells(x, columna_recibido).Value = "" Then
+        
+        message_string = "No De Parte: " + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + vbNewLine + "Descripcion: " + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + vbNewLine + "Cantidad Requerida: " + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + vbNewLine + "Fecha De Pedido: " + CStr(Worksheets(workbook_name).Cells(x, 1).Value)
+        Dim temporary_variant As Variant
+        temporary_variant = Application.InputBox(message_string + vbNewLine + "Cantidad de material enviado: ", Type:=Number, Default:="", Title:="Agregar cantidad")
+        
+        
+        If WorksheetFunction.IsText(temporary_variant) Then
+            temporary_variant = Replace(temporary_variant, "=", "")
+            Worksheets(workbook_name).Cells(x, columna_recibido).Value = temporary_variant
+            
+            Dim currentValue As Double
+            currentValue = Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value
+            
+            If currentValue = CDbl(temporary_variant) Then
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 4 'Verde para cuando las cantidades son correctas
+                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
+            ElseIf currentValue < CDbl(temporary_variant) Then
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 46 'Naranja para los numeros que exceden la cantidad original
+                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
+            ElseIf currentValue > CDbl(temporary_variant) Then
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 28 'Azul para los numeros que no superan la cantidad minima
+                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
+            End If
+        Else
+            Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
+            
+        End If
+        
+    End If
+
+Next x
+
+Worksheets(workbook_name).Protect ("admin")
+Confirmar_Pedido = CSV_Table_To_HTML_For_Confirmation(data_csv_string, 6)
+
+End Function
+
+Function CSV_Table_To_HTML_For_Confirmation(CSV_Info As String, Qty_Values_Per_Row As Integer) As String
+
+    Dim Array_String() As String
+    Dim Array_Length As Integer
+    Dim Redacted_Table As String
+    Dim Array_Pointer As Integer
+        
+    Array_Pointer = 0
+    
+    Array_String() = Split(CSV_Info, "<<")
+    Array_Points = UBound(Array_String) / Qty_Values_Per_Row
+    Redacted_Table = "<style> table,tr,th,td { border: 1px solid black; border-collapse: collapse; text-align: left}</style>"
+    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Enviada&nbsp;&nbsp;</th></tr>"
+    
+    
+    For x = 1 To Array_Points Step 1
+    
+        Redacted_Table = Redacted_Table + "<tr>"
+            
+            For Y = Array_Pointer To Array_Pointer + Qty_Values_Per_Row - 1 Step 1
+            
+                Redacted_Table = Redacted_Table + "<td>&nbsp;&nbsp;" + Array_String(Y) + "&nbsp;&nbsp;</td>"
+                
+            Next Y
+            
+        Array_Pointer = Array_Pointer + Qty_Values_Per_Row
+        Redacted_Table = Redacted_Table + "</tr>"
+        
+    Next x
+        CSV_Table_To_HTML_For_Confirmation = Redacted_Table
+
+End Function
