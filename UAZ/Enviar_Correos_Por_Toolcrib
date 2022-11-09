@@ -53,7 +53,12 @@ If Result = vbYes Then
         
     ElseIf s_Programs = "" Then
         
-        MsgBox ("Primero llena la informacion antes de enviar la solicitud")
+        MsgBox ("Primero llena la informacion antes de enviar la solicitud" + vbNewLine + "Recuerda colocar la celda en color blanco o vacio para someter un material que ya habias solicitado")
+        Application.ScreenUpdating = True
+        Application.EnableEvents = True
+        Application.Calculation = xlCalculationAutomatic
+        Exit Sub
+        
         
     End If
     Else:
@@ -83,6 +88,10 @@ Dim st_Return_Programs As String
 Dim i_Column_Dia_Actual As Integer
 Dim variable As Double
 Dim st_HTML_Table_CSV As String
+Dim Color_Index_For_Blank As Integer
+Dim Color_Index_For_White As Integer
+Color_Index_For_Blank = -4142
+Color_Index_For_White = 2
 
 st_Worksheet_Name_Toolcrib = "Control tool crib F1"
 st_Product_Lines_Names = ""
@@ -99,7 +108,7 @@ i_Cantidad_Filas_Toolcrib = WorksheetFunction.CountA(Worksheets(st_Worksheet_Nam
 
 For x = 3 To (i_Cantidad_Filas_Toolcrib + 2) Step 1
 
-    If Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" Then
+    If Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" And (Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_Blank Or Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_White) Then
         Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.Color = vbYellow
         st_Product_Lines_Names = st_Product_Lines_Names + Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, 2).Value + ","
         st_HTML_Table_CSV = st_HTML_Table_CSV + Escribir_LogBook(x, i_Column_Dia_Actual, st_Worksheet_Name_Toolcrib)
@@ -225,6 +234,7 @@ Sub Enviar_Correo_Material_Enviado()
         Application.Calculation = xlCalculationAutomatic
         Exit Sub
     End If
+
 MsgBox "Correo enviado correctamente"
 Application.ScreenUpdating = True
 Application.EnableEvents = True
