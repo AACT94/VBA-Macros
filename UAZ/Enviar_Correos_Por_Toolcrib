@@ -108,13 +108,19 @@ i_Cantidad_Filas_Toolcrib = WorksheetFunction.CountA(Worksheets(st_Worksheet_Nam
 
 For x = 3 To (i_Cantidad_Filas_Toolcrib + 2) Step 1
 
-    If Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" And (Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_Blank Or Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_White) Then
+    If IsNumeric(Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value) = False Then
+        MsgBox ("Solo esta permitido escribir numeros")
+    
+    ElseIf Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" _
+    And (Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_Blank _
+    Or Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_White) Then
         Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.Color = vbYellow
         st_Product_Lines_Names = st_Product_Lines_Names + Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, 2).Value + ","
         st_HTML_Table_CSV = st_HTML_Table_CSV + Escribir_LogBook(x, i_Column_Dia_Actual, st_Worksheet_Name_Toolcrib)
         i_Cantidad_De_Registros = i_Cantidad_De_Registros + 1
     End If
-
+    
+    
 Next x
 
 
@@ -191,54 +197,70 @@ Sub Enviar_Correo_Material_Enviado()
 
     Result = MsgBox("¿Estas listo para empezar a cargar informacion de envio?", vbYesNo + vbQuestion)
     If Result = vbYes Then
-        '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
     
-        Dim EmailApp As Outlook.Application 'To refer to outlook
-        Set EmailApp = New Outlook.Application 'Here we created an instance of the outlook app
+        Dim i_table_length As Integer
+        Dim s_table_content As String
+        s_table_content = Confirmar_Pedido()
+        i_table_length = Len(s_table_content)
         
-        ''Now we need to create the email object
-        Dim EmailItem As Outlook.MailItem '
-        Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
+        If s_table_content <> "" And i_table_length > 404 Then 'La cantidad de 404 es la cantidad exacta de caracteres cuando la tabla esta vacia.
+            '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
         
+            Dim EmailApp As Outlook.Application 'To refer to outlook
+            Set EmailApp = New Outlook.Application 'Here we created an instance of the outlook app
+            
+            ''Now we need to create the email object
+            Dim EmailItem As Outlook.MailItem '
+            Set EmailItem = EmailApp.CreateItem(olMailItem) 'Here we created an instance of the email
+            
+            
+            
+            '====== CODIGO PARA AGREGAR MAS USUARIOS ========
+            
+            Dim CantidadCeldas_To As Integer
+            Dim WorksheetNameForContactos As String
+                    
+            WorksheetNameForContactos = "CONTACTOS"
+            CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
+            
+            
+            For x = 1 To (CantidadCeldas_To - 1) Step 1
+            
+            EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
+            
+            Next x
+            
+            EmailItem.CC = "acoronado03@intevaproducts.com"
+            EmailItem.BCC = "acoronado03@intevaproducts.com"
+            
+            EmailItem.Subject = "Test"
+            EmailItem.HTMLBody = "Confirmacion de materiales enviados: " + "<br/><br/><table>" + s_table_content + "</table>"
+            EmailItem.Send
+            
+            Application.ScreenUpdating = True
+            Application.EnableEvents = True
+            Application.Calculation = xlCalculationAutomatic
+            MsgBox "Correo enviado correctamente"
         
+        Else
         
-        '====== CODIGO PARA AGREGAR MAS USUARIOS ========
-        
-        Dim CantidadCeldas_To As Integer
-        Dim WorksheetNameForContactos As String
-                
-        WorksheetNameForContactos = "CONTACTOS"
-        CantidadCeldas_To = WorksheetFunction.CountA(Worksheets(WorksheetNameForContactos).Range("A:A"))
-        
-        
-        For x = 1 To (CantidadCeldas_To - 1) Step 1
-        
-        EmailItem.Recipients.Add (Worksheets(WorksheetNameForContactos).Cells(x + 1, 1).Value)
-        
-        Next x
-        
-        EmailItem.CC = "acoronado03@intevaproducts.com"
-        EmailItem.BCC = "acoronado03@intevaproducts.com"
-        
-        EmailItem.Subject = "Test"
-        EmailItem.HTMLBody = "Confirmacion de materiales enviados: " + "<br/><br/><table>" + Confirmar_Pedido() + "</table>"
-        EmailItem.Send
-        
+        MsgBox ("No se puede enviar correo porque la informacion no ha sido actualizada")
         Application.ScreenUpdating = True
         Application.EnableEvents = True
         Application.Calculation = xlCalculationAutomatic
         
+        
+        End If
+            
     Else: MsgBox "Entendido, puedes volver a iniciar el proceso presionando el boton de nuevo"
         Application.ScreenUpdating = True
         Application.EnableEvents = True
         Application.Calculation = xlCalculationAutomatic
         Exit Sub
+    
     End If
 
-MsgBox "Correo enviado correctamente"
-Application.ScreenUpdating = True
-Application.EnableEvents = True
-Application.Calculation = xlCalculationAutomatic
+
 End Sub
 
 
@@ -283,7 +305,8 @@ Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cel
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_PartNumber_Column).Value)
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Description_Column).Value)
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Pedido_Column).Value) + "<<"
-Worksheets(s_Logbook_Name).Protect ("admin")
+Worksheets(s_Logbook_Name).Protect Password:="admin", AllowSorting:=True, AllowFiltering:=True
+Worksheets(s_Logbook_Name).EnableSelection = xlNoSelection
 End Function
 
 Function CSV_Table_To_HTML(CSV_Info As String, Qty_Values_Per_Row As Integer) As String
@@ -346,18 +369,28 @@ For x = 2 To last_row Step 1
 
     If Worksheets(workbook_name).Cells(x, columna_recibido).Value = "" Then
         
-        message_string = "No De Parte: " + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + vbNewLine + "Descripcion: " + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + vbNewLine + "Cantidad Requerida: " + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + vbNewLine + "Fecha De Pedido: " + CStr(Worksheets(workbook_name).Cells(x, 1).Value)
+        '#### Fragmento para verificar que la descripcion del producto no sea demasiado larga para el input box y asi evitar errores"
+        Dim s_description As String
+        s_description = CStr(Worksheets(workbook_name).Cells(x, 4).Value)
+        If Len(s_description) > 91 Then
+            s_description = Left(s_description, 90)
+        End If
+        
+        '#######
+        
+        message_string = "No De Parte: " + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + vbNewLine + "Descripcion: " + s_description + vbNewLine + "Cantidad Requerida: " + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + vbNewLine + "Fecha De Pedido: " + CStr(Worksheets(workbook_name).Cells(x, 1).Value)
         Dim temporary_variant As Variant
         temporary_variant = Application.InputBox(message_string + vbNewLine + "Cantidad de material enviado: ", Type:=Number, Default:="", Title:="Agregar cantidad")
         
         
-        If WorksheetFunction.IsText(temporary_variant) Then
+        If WorksheetFunction.IsText(temporary_variant) And temporary_variant <> "=0" Then
             temporary_variant = Replace(temporary_variant, "=", "")
             Worksheets(workbook_name).Cells(x, columna_recibido).Value = temporary_variant
             
             Dim currentValue As Double
             currentValue = Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value
             
+            On Error GoTo Escribiste_Una_Letra
             If currentValue = CDbl(temporary_variant) Then
                 Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
                 Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 4 'Verde para cuando las cantidades son correctas
@@ -371,6 +404,11 @@ For x = 2 To last_row Step 1
                 Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 28 'Azul para los numeros que no superan la cantidad minima
                 data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
             End If
+            
+
+            
+                
+            
         Else
             Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
             
@@ -380,8 +418,18 @@ For x = 2 To last_row Step 1
 
 Next x
 
-Worksheets(workbook_name).Protect ("admin")
+Worksheets(workbook_name).Protect Password:="admin", AllowSorting:=True, AllowFiltering:=True
+Worksheets(workbook_name).EnableSelection = xlNoSelection
+
 Confirmar_Pedido = CSV_Table_To_HTML_For_Confirmation(data_csv_string, 6)
+
+GoTo Final_Funcion
+
+Escribiste_Una_Letra:
+            MsgBox ("Recuerda que solo puedes escribir numeros!!!")
+            Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
+
+Final_Funcion:
 
 End Function
 
