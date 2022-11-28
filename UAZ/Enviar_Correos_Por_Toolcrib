@@ -34,7 +34,6 @@ If Result = vbYes Then
     
     Next x
     
-    EmailItem.CC = "acoronado03@intevaproducts.com"
     EmailItem.BCC = "acoronado03@intevaproducts.com"
     
     Dim s_Programs As String
@@ -47,7 +46,7 @@ If Result = vbYes Then
     
     If s_Programs <> "" Then
         
-        EmailItem.Subject = "Requisicion de Material"
+        EmailItem.Subject = "Requisicion de Material: Toolcrib - Alianza"
         EmailItem.HTMLBody = "Requisicion para las siguientes lineas de producto: " + s_Programs + "<br/><br/><table>" + s_Table + "</table>"
         EmailItem.Send
         
@@ -108,19 +107,17 @@ i_Cantidad_Filas_Toolcrib = WorksheetFunction.CountA(Worksheets(st_Worksheet_Nam
 
 For x = 3 To (i_Cantidad_Filas_Toolcrib + 2) Step 1
 
-    If IsNumeric(Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value) = False Then
-        MsgBox ("Solo esta permitido escribir numeros")
-    
-    ElseIf Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" _
-    And (Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_Blank _
-    Or Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_White) Then
+    If Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value <> "" And (Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_Blank Or Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.ColorIndex = Color_Index_For_White) And IsNumeric(Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value) Then
         Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Interior.Color = vbYellow
         st_Product_Lines_Names = st_Product_Lines_Names + Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, 2).Value + ","
         st_HTML_Table_CSV = st_HTML_Table_CSV + Escribir_LogBook(x, i_Column_Dia_Actual, st_Worksheet_Name_Toolcrib)
         i_Cantidad_De_Registros = i_Cantidad_De_Registros + 1
     End If
     
-    
+    If Not IsNumeric(Worksheets(st_Worksheet_Name_Toolcrib).Cells(x, i_Column_Dia_Actual).Value) Then
+        MsgBox ("No puedes utilizar letras o simbolos, solo numeros")
+    End If
+
 Next x
 
 
@@ -203,7 +200,7 @@ Sub Enviar_Correo_Material_Enviado()
         s_table_content = Confirmar_Pedido()
         i_table_length = Len(s_table_content)
         
-        If s_table_content <> "" And i_table_length > 404 Then 'La cantidad de 404 es la cantidad exacta de caracteres cuando la tabla esta vacia.
+        If s_table_content <> "" And i_table_length > 441 Then 'La cantidad de 441 es la cantidad exacta de caracteres cuando la tabla esta vacia.
             '====== INICIAR OBJETO DE OUTLOOK Y CORREO ======
         
             Dim EmailApp As Outlook.Application 'To refer to outlook
@@ -233,7 +230,7 @@ Sub Enviar_Correo_Material_Enviado()
             EmailItem.CC = "acoronado03@intevaproducts.com"
             EmailItem.BCC = "acoronado03@intevaproducts.com"
             
-            EmailItem.Subject = "Test"
+            EmailItem.Subject = "Requisicion de Material - Confirmacion: Toolcrib - Alianza"
             EmailItem.HTMLBody = "Confirmacion de materiales enviados: " + "<br/><br/><table>" + s_table_content + "</table>"
             EmailItem.Send
             
@@ -278,10 +275,11 @@ Dim i_RowValue_Column As Integer
 
 
 i_Date_Column = 1
-i_ProductLine_Column = 2
-i_PartNumber_Column = 3
-i_Description_Column = 4
-i_Pedido_Column = 5
+i_Aprobador_Column = 2
+i_ProductLine_Column = 3
+i_PartNumber_Column = 4
+i_Description_Column = 5
+i_Pedido_Column = 6
 i_RowValue_Column = 16383
 i_ColumnValue_Column = 16384
 
@@ -292,7 +290,7 @@ i_latest_file = WorksheetFunction.CountA(Worksheets(s_Logbook_Name).Range("A:A")
 Worksheets(s_Logbook_Name).Unprotect ("admin")
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).Value = Now()
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).NumberFormat = "YYYY/MM/DD hh:mm"
-
+Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Aprobador_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 1)
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ProductLine_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 2)
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_PartNumber_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 3)
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Description_Column).Value = Worksheets(s_Toolcrib_Page_Name).Cells(Fila_Actual, 4)
@@ -349,7 +347,7 @@ Dim workbook_name As String
 Dim workbook_name_to_update As String
 Dim data_csv_string As String
 
-workbook_name = "LOGBOOK_PEDIDOS"
+    workbook_name = "LOGBOOK_PEDIDOS"
 workbook_name_to_update = "Control tool crib F1"
 data_csv_string = ""
 Worksheets(workbook_name).Unprotect ("admin")
@@ -361,75 +359,91 @@ Dim last_row As Integer
 last_row = WorksheetFunction.CountA(Worksheets(workbook_name).Range("A:A"))
 
 Dim columna_recibido As Integer
-columna_recibido = 6
+columna_recibido = 7
+
+Dim i_Part_No_Column As Integer
+Dim i_Description_Column As Integer
+Dim i_Qty_Column As Integer
+Dim i_Date_Column As Integer
+Dim bool_temporary_condition As Boolean
+
+i_Part_No_Column = 4
+i_Description_Column = 5
+i_Qty_Column = 6
+i_Date_Column = 1
 
 Dim message_string As String
 
-For x = 2 To last_row Step 1
+For x = 2 To last_row Step 1 'PRIMER CICLO
 
-    If Worksheets(workbook_name).Cells(x, columna_recibido).Value = "" Then
+    If Worksheets(workbook_name).Cells(x, columna_recibido).Value = "" Then  'PRIMERA CONDICION
         
         '#### Fragmento para verificar que la descripcion del producto no sea demasiado larga para el input box y asi evitar errores"
         Dim s_description As String
-        s_description = CStr(Worksheets(workbook_name).Cells(x, 4).Value)
-        If Len(s_description) > 91 Then
+        s_description = CStr(Worksheets(workbook_name).Cells(x, i_Description_Column).Value)
+        If Len(s_description) > 91 Then                'SEGUNDA CONDICION
             s_description = Left(s_description, 90)
-        End If
+        End If                                         'CIERRA SEGUNDA CONDICION
         
         '#######
         
-        message_string = "No De Parte: " + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + vbNewLine + "Descripcion: " + s_description + vbNewLine + "Cantidad Requerida: " + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + vbNewLine + "Fecha De Pedido: " + CStr(Worksheets(workbook_name).Cells(x, 1).Value)
-        Dim temporary_variant As Variant
-        temporary_variant = Application.InputBox(message_string + vbNewLine + "Cantidad de material enviado: ", Type:=Number, Default:="", Title:="Agregar cantidad")
+        message_string = "No De Parte: " + CStr(Worksheets(workbook_name).Cells(x, i_Part_No_Column).Value) + vbNewLine + _
+        "Descripcion: " + s_description + vbNewLine + _
+        "Cantidad Requerida: " + CStr(Worksheets(workbook_name).Cells(x, i_Qty_Column).Value) + vbNewLine + _
+        "Fecha De Pedido: " + CStr(Worksheets(workbook_name).Cells(x, i_Date_Column).Value)
         
-        
-        If WorksheetFunction.IsText(temporary_variant) And temporary_variant <> "=0" Then
-            temporary_variant = Replace(temporary_variant, "=", "")
-            Worksheets(workbook_name).Cells(x, columna_recibido).Value = temporary_variant
+    
+        Do
             
-            Dim currentValue As Double
-            currentValue = Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value
+            Dim temporary_variant As Variant
+            temporary_variant = Application.InputBox(message_string + vbNewLine + "Cantidad de material enviado: ", Type:=Number, Default:="", Title:="Agregar cantidad")
+            bool_temporary_condition = True
             
-            On Error GoTo Escribiste_Una_Letra
-            If currentValue = CDbl(temporary_variant) Then
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 4 'Verde para cuando las cantidades son correctas
-                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
-            ElseIf currentValue < CDbl(temporary_variant) Then
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 46 'Naranja para los numeros que exceden la cantidad original
-                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
-            ElseIf currentValue > CDbl(temporary_variant) Then
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
-                Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 28 'Azul para los numeros que no superan la cantidad minima
-                data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + temporary_variant + "<<"
-            End If
-            
-
-            
+            If WorksheetFunction.IsText(temporary_variant) And temporary_variant <> "=0" Then 'TERCERA CONDICION
+                temporary_variant = Replace(temporary_variant, "=", "")
                 
+                If IsNumeric(temporary_variant) Then  'CUARTA CONDICION
+                 
+                    Worksheets(workbook_name).Cells(x, columna_recibido).Value = temporary_variant
+                
+                    Dim currentValue As Double
+                    currentValue = Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value
+                
+                    If currentValue = CDbl(temporary_variant) Then 'QUINTA CONDICION
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 4 'Verde para cuando las cantidades son correctas
+                        data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 6).Value) + "<<" + temporary_variant + "<<"
+                    
+                    ElseIf currentValue < CDbl(temporary_variant) Then
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 46 'Naranja para los numeros que exceden la cantidad original
+                        data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 6).Value) + "<<" + temporary_variant + "<<"
+                    
+                    ElseIf currentValue > CDbl(temporary_variant) Then
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Value = temporary_variant
+                        Worksheets(workbook_name_to_update).Cells(Worksheets(workbook_name).Cells(x, 16383), Worksheets(workbook_name).Cells(x, 16384)).Interior.ColorIndex = 28 'Azul para los numeros que no superan la cantidad minima
+                        data_csv_string = data_csv_string + CStr(Worksheets(workbook_name).Cells(x, 1).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 2).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 3).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 4).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 5).Value) + "<<" + CStr(Worksheets(workbook_name).Cells(x, 6).Value) + "<<" + temporary_variant + "<<"
+                    End If 'CIERRA QUINTA CONDICION
+                    bool_temporary_condition = False
+                
+                Else
+                    MsgBox ("No puedes colocar letras o espacios")
+                End If 'CUARTA CONDICION
             
-        Else
-            Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
-            
-        End If
+            Else
+                Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
+            End If 'TERCERA CONDICION
         
-    End If
+     Loop While (bool_temporary_condition = True)
+  End If 'CIERRE PRIMERA CONDICION
 
-Next x
+Next x ' PRIMER CICLO
 
 Worksheets(workbook_name).Protect Password:="admin", AllowSorting:=True, AllowFiltering:=True
 Worksheets(workbook_name).EnableSelection = xlNoSelection
 
-Confirmar_Pedido = CSV_Table_To_HTML_For_Confirmation(data_csv_string, 6)
+Confirmar_Pedido = CSV_Table_To_HTML_For_Confirmation(data_csv_string, 7)
 
-GoTo Final_Funcion
-
-Escribiste_Una_Letra:
-            MsgBox ("Recuerda que solo puedes escribir numeros!!!")
-            Worksheets(workbook_name).Cells(x, columna_recibido).Value = ""
-
-Final_Funcion:
 
 End Function
 
@@ -445,7 +459,13 @@ Function CSV_Table_To_HTML_For_Confirmation(CSV_Info As String, Qty_Values_Per_R
     Array_String() = Split(CSV_Info, "<<")
     Array_Points = UBound(Array_String) / Qty_Values_Per_Row
     Redacted_Table = "<style> table,tr,th,td { border: 1px solid black; border-collapse: collapse; text-align: left}</style>"
-    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Enviada&nbsp;&nbsp;</th></tr>"
+    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Aprobador;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Cantidad Enviada&nbsp;&nbsp;</th></tr>"
     
     
     For x = 1 To Array_Points Step 1
