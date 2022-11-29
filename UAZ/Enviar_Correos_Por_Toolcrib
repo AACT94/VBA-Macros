@@ -142,7 +142,7 @@ If st_Product_Lines_Names <> "" Then
     Next x
     
     var.Add st_Return_Programs
-    var.Add CSV_Table_To_HTML(st_HTML_Table_CSV, 5)
+    var.Add CSV_Table_To_HTML(st_HTML_Table_CSV, 6)
     Set ObtenerListadoDeProgramas = var
 
 End If
@@ -299,6 +299,7 @@ Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_RowValue_Column).Value = F
 Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ColumnValue_Column).Value = Column_Dia_Actual
 
 Escribir_LogBook = CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Date_Column).Value)
+Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Aprobador_Column).Value)
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_ProductLine_Column).Value)
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_PartNumber_Column).Value)
 Escribir_LogBook = Escribir_LogBook + "<<" + CStr(Worksheets(s_Logbook_Name).Cells(i_latest_file + 1, i_Description_Column).Value)
@@ -319,7 +320,12 @@ Function CSV_Table_To_HTML(CSV_Info As String, Qty_Values_Per_Row As Integer) As
     Array_String() = Split(CSV_Info, "<<")
     Array_Points = UBound(Array_String) / Qty_Values_Per_Row
     Redacted_Table = "<style> table,tr,th,td { border: 1px solid black; border-collapse: collapse; text-align: left}</style>"
-    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th></tr>"
+    Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th>" + _
+    "<th>&nbsp;&nbsp;Aprobador&nbsp;&nbsp;</th>" + _
+    "<th>&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th>" + _
+    "<th>&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th>" + _
+    "<th>&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th>" + _
+    "<th>&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th></tr>"
     
     
     For x = 1 To Array_Points Step 1
@@ -461,7 +467,7 @@ Function CSV_Table_To_HTML_For_Confirmation(CSV_Info As String, Qty_Values_Per_R
     Redacted_Table = "<style> table,tr,th,td { border: 1px solid black; border-collapse: collapse; text-align: left}</style>"
     Redacted_Table = Redacted_Table + "<tr><th>&nbsp;&nbsp;Fecha De Peticion&nbsp;&nbsp;</th><th>" + _
     "&nbsp;&nbsp;Linea De Producto&nbsp;&nbsp;</th><th>" + _
-    "&nbsp;&nbsp;Aprobador;&nbsp;</th><th>" + _
+    "&nbsp;&nbsp;Aprobador&nbsp;</th><th>" + _
     "&nbsp;&nbsp;Numero De Parte&nbsp;&nbsp;</th><th>" + _
     "&nbsp;&nbsp;Descripcion&nbsp;&nbsp;</th><th>" + _
     "&nbsp;&nbsp;Cantidad Solicitada&nbsp;&nbsp;</th><th>" + _
