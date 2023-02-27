@@ -1,0 +1,27 @@
+Sub Llenar_Filas()
+
+Dim s_workbook_name As String
+Dim i_pointer As Integer
+Dim i_total_filas As Integer
+Dim s_current_value As String
+Dim s_next_value As String
+
+s_workbook_name = "TEST"
+i_pointer = 2
+i_total_filas = 1506
+
+Do
+
+    s_current_value = ThisWorkbook.Sheets(s_workbook_name).Cells(i_pointer, 1).Value
+    s_next_value = ThisWorkbook.Sheets(s_workbook_name).Cells(i_pointer + 1, 1).Value
+    
+    If s_next_value = "" Then
+        ThisWorkbook.Sheets(s_workbook_name).Cells(i_pointer + 1, 1).Value = s_current_value
+    End If
+    
+    i_pointer = i_pointer + 1
+    
+Loop While i_pointer <= i_total_filas
+
+
+End Sub
